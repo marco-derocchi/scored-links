@@ -19,7 +19,7 @@
 <body>
   <div class="card">
     <h1>Open Scored App</h1>
-    <p class="muted">If the app is installed, it should open automatically. If not, you will be redirected to Google Play.</p>
+    <p class="muted">If the app is installed, it should open automatically. If not, you will be redirected to your device app store.</p>
     <div class="row">
       <a id="openNow" class="button" href="#">Open App</a>
       <a id="installNow" class="button secondary" href="#">Install App</a>
@@ -29,15 +29,20 @@
   <script>
     (function () {
       var appId = "com.example.phone_app";
+      var appStoreSearchUrl = "https://apps.apple.com/us/search?term=Scored";
       var params = new URLSearchParams(window.location.search);
       var payload = params.toString();
+      var userAgent = navigator.userAgent || "";
+      var isAndroid = /Android/i.test(userAgent);
+      var isIOS = /iPhone|iPad|iPod/i.test(userAgent);
+      var redirectTimers = [];
 
       // App Link and fallback scheme carry the same query payload.
       var appLink = "https://links.scoredlabs.com/open" + (payload ? "?" + payload : "");
       var schemeLink = "scored://open" + (payload ? "?" + payload : "");
 
       // Keep payload through Play referrer so backend/app can recover context.
-      var referrerValue = encodeURIComponent("utm_source=qr&" + payload);
+      var referrerValue = encodeURIComponent("utm_source=qr" + (payload ? "&" + payload : ""));
       var playStore = "https://play.google.com/store/apps/details?id=" + appId + "&referrer=" + referrerValue;
       var intentLink =
         "intent://open" +
@@ -51,25 +56,53 @@
       var openNow = document.getElementById("openNow");
       var installNow = document.getElementById("installNow");
       openNow.href = schemeLink;
-      installNow.href = playStore;
+      installNow.href = isIOS ? appStoreSearchUrl : playStore;
+
+      function scheduleRedirect(url, delay) {
+        var timer = setTimeout(function () {
+          window.location.href = url;
+        }, delay);
+        redirectTimers.push(timer);
+      }
+
+      function cancelRedirects() {
+        for (var i = 0; i < redirectTimers.length; i++) {
+          clearTimeout(redirectTimers[i]);
+        }
+        redirectTimers = [];
+      }
+
+      window.addEventListener("pagehide", cancelRedirects);
+      document.addEventListener("visibilitychange", function () {
+        if (document.hidden) {
+          cancelRedirects();
+        }
+      });
 
       // Try to open app immediately.
       window.location.href = appLink;
 
-      // If scanner opens Chrome directly, intent:// is more reliable than custom scheme.
-      setTimeout(function () {
-        window.location.href = intentLink;
-      }, 250);
+      if (isAndroid) {
+        // If scanner opens Chrome directly, intent:// is more reliable than custom scheme.
+        scheduleRedirect(intentLink, 250);
 
-      // Fallback to custom scheme quickly for browsers that ignore app links.
-      setTimeout(function () {
-        window.location.href = schemeLink;
-      }, 700);
+        // Fallback to custom scheme quickly for browsers that ignore app links.
+        scheduleRedirect(schemeLink, 700);
 
-      // If still on page, go to Play Store.
-      setTimeout(function () {
-        window.location.href = playStore;
-      }, 2200);
+        // If still on page, go to Play Store.
+        scheduleRedirect(playStore, 2200);
+        return;
+      }
+
+      if (isIOS) {
+        // On iOS, attempt custom scheme and then App Store fallback.
+        scheduleRedirect(schemeLink, 350);
+        scheduleRedirect(appStoreSearchUrl, 2200);
+        return;
+      }
+
+      // Desktop or unknown platform: offer install destination but don't force redirects.
+      installNow.href = playStore;
     })();
   </script>
 </body>
