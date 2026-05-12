@@ -42,6 +42,9 @@
       // App Link and fallback scheme carry the same query payload.
       var appLink = "https://links.scoredlabs.com/pair" + (payload ? "?" + payload : "");
       var schemeLink = "scored://pair" + (payload ? "?" + payload : "");
+      var currentNoHash = window.location.href.split("#")[0];
+      var appLinkNoHash = appLink.split("#")[0];
+      var shouldAttemptAppLink = currentNoHash !== appLinkNoHash;
 
       // Keep payload through Play referrer so backend/app can recover context.
       var referrerValue = encodeURIComponent("utm_source=qr" + (payload ? "&" + payload : ""));
@@ -92,8 +95,10 @@
         stopTimers();
       });
 
-      // Try to open app immediately.
-      window.location.replace(appLink);
+      // Avoid reloading the same landing URL (can cause loops/freezes on some browsers).
+      if (shouldAttemptAppLink) {
+        window.location.replace(appLink);
+      }
 
       if (isAndroid) {
         // If scanner opens Chrome directly, intent:// is more reliable than custom scheme.
