@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Open Scored</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 24px; background: #0a2a43; color: #ffffff; }
+    .card { max-width: 460px; margin: 40px auto; background: #114164; border-radius: 14px; padding: 24px; }
+    .muted { opacity: 0.86; }
+    .row { margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; }
+    a.button { display: inline-block; text-decoration: none; color: #0a2a43; background: #9ad54b; font-weight: 700; padding: 10px 14px; border-radius: 8px; }
+    a.secondary { background: #d1dde8; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Opening Scored...</h1>
+    <p class="muted">If the app is installed, it should open automatically. If not, you will be redirected to Google Play.</p>
+    <div class="row">
+      <a id="openNow" class="button" href="#">Open App</a>
+      <a id="installNow" class="button secondary" href="#">Install App</a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var appId = "com.example.phone_app";
+      var params = new URLSearchParams(window.location.search);
+      var payload = params.toString();
+
+      // App Link and fallback scheme carry the same query payload.
+      var appLink = "https://links.scoredlabs.com/pair" + (payload ? "?" + payload : "");
+      var schemeLink = "scored://pair" + (payload ? "?" + payload : "");
+
+      // Keep payload through Play referrer so backend/app can recover context.
+      var referrerValue = encodeURIComponent("utm_source=qr&" + payload);
+      var playStore = "https://play.google.com/store/apps/details?id=" + appId + "&referrer=" + referrerValue;
+
+      var openNow = document.getElementById("openNow");
+      var installNow = document.getElementById("installNow");
+      openNow.href = schemeLink;
+      installNow.href = playStore;
+
+      // Try to open app immediately.
+      window.location.href = appLink;
+
+      // Fallback to custom scheme quickly for browsers that ignore app links.
+      setTimeout(function () {
+        window.location.href = schemeLink;
+      }, 400);
+
+      // If still on page, go to Play Store.
+      setTimeout(function () {
+        window.location.href = playStore;
+      }, 1800);
+    })();
+  </script>
+</body>
+</html>
