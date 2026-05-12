@@ -45,9 +45,10 @@
 
       // Keep payload through Play referrer so backend/app can recover context.
       var referrerValue = encodeURIComponent("utm_source=qr" + (payload ? "&" + payload : ""));
+      var playStoreMarket = "market://details?id=" + appId;
       var playStoreDetails = "https://play.google.com/store/apps/details?id=" + appId + "&referrer=" + referrerValue;
       var playStoreSearch = "https://play.google.com/store/search?q=" + encodeURIComponent(appId) + "&c=apps";
-      var playStore = playStoreSearch;
+      var playStore = playStoreMarket;
       var intentLink =
         "intent://open" +
         (payload ? "?" + payload : "") +
@@ -60,7 +61,7 @@
       var openNow = document.getElementById("openNow");
       var installNow = document.getElementById("installNow");
       openNow.href = isAndroid ? intentLink : schemeLink;
-      installNow.href = isIOS ? appStoreSearchUrl : playStore;
+      installNow.href = isIOS ? appStoreSearchUrl : playStoreMarket;
 
       function scheduleRedirect(url, delay, allowWhenResumed) {
         var timer = setTimeout(function () {
@@ -101,8 +102,11 @@
         // Fallback to custom scheme quickly for browsers that ignore app links.
         scheduleRedirect(schemeLink, 900, false);
 
-        // If still on page, go to Play Store.
+        // If still on page, try to open Play Store app.
         scheduleRedirect(playStore, 2600, false);
+
+        // Final fallback: Play Store website/search in browser.
+        scheduleRedirect(playStoreSearch, 3400, false);
         return;
       }
 
