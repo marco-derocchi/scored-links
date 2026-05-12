@@ -39,24 +39,37 @@
       // Keep payload through Play referrer so backend/app can recover context.
       var referrerValue = encodeURIComponent("utm_source=qr&" + payload);
       var playStore = "https://play.google.com/store/apps/details?id=" + appId + "&referrer=" + referrerValue;
+      var intentLink =
+        "intent://open" +
+        (payload ? "?" + payload : "") +
+        "#Intent;scheme=scored;package=" +
+        appId +
+        ";S.browser_fallback_url=" +
+        encodeURIComponent(playStore) +
+        ";end";
 
       var openNow = document.getElementById("openNow");
       var installNow = document.getElementById("installNow");
-      openNow.href = schemeLink;
+      openNow.href = intentLink;
       installNow.href = playStore;
 
       // Try to open app immediately.
       window.location.href = appLink;
 
+      // If scanner opens Chrome directly, intent:// is more reliable than custom scheme.
+      setTimeout(function () {
+        window.location.href = intentLink;
+      }, 250);
+
       // Fallback to custom scheme quickly for browsers that ignore app links.
       setTimeout(function () {
         window.location.href = schemeLink;
-      }, 400);
+      }, 700);
 
       // If still on page, go to Play Store.
       setTimeout(function () {
         window.location.href = playStore;
-      }, 1800);
+      }, 2200);
     })();
   </script>
 </body>
