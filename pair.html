@@ -51,7 +51,13 @@
       var playStoreMarket = "market://details?id=" + appId;
       var playStoreDetails = "https://play.google.com/store/apps/details?id=" + appId + "&referrer=" + referrerValue;
       var playStoreSearch = "https://play.google.com/store/search?q=" + encodeURIComponent(appId) + "&c=apps";
-      var playStore = playStoreMarket;
+      var playStoreIntent =
+        "intent://details?id=" +
+        encodeURIComponent(appId) +
+        "#Intent;scheme=market;package=com.android.vending;S.browser_fallback_url=" +
+        encodeURIComponent(playStoreSearch) +
+        ";end";
+      var playStore = playStoreIntent;
       var intentLink =
         "intent://pair" +
         (payload ? "?" + payload : "") +
@@ -64,7 +70,7 @@
       var openNow = document.getElementById("openNow");
       var installNow = document.getElementById("installNow");
       openNow.href = isAndroid ? intentLink : schemeLink;
-      installNow.href = isIOS ? appStoreSearchUrl : playStoreMarket;
+      installNow.href = isIOS ? appStoreSearchUrl : playStoreIntent;
 
       function scheduleRedirect(url, delay, allowWhenResumed) {
         var timer = setTimeout(function () {
