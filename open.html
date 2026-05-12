@@ -35,7 +35,9 @@
       var userAgent = navigator.userAgent || "";
       var isAndroid = /Android/i.test(userAgent);
       var isIOS = /iPhone|iPad|iPod/i.test(userAgent);
-      var redirectTimers = [];
+      var launchStartedAt = Date.now();
+      var timers = [];
+      var didUnload = false;
 
       // App Link and fallback scheme carry the same query payload.
       var appLink = "https://links.scoredlabs.com/open" + (payload ? "?" + payload : "");
@@ -55,49 +57,57 @@
 
       var openNow = document.getElementById("openNow");
       var installNow = document.getElementById("installNow");
-      openNow.href = schemeLink;
+      openNow.href = isAndroid ? intentLink : schemeLink;
       installNow.href = isIOS ? appStoreSearchUrl : playStore;
 
-      function scheduleRedirect(url, delay) {
+      function scheduleRedirect(url, delay, allowWhenResumed) {
         var timer = setTimeout(function () {
-          window.location.href = url;
+          if (didUnload) {
+            return;
+          }
+
+          // If the page spent time in background (app switch), do not fire late fallbacks.
+          var elapsed = Date.now() - launchStartedAt;
+          if (!allowWhenResumed && elapsed > delay + 1500) {
+            return;
+          }
+
+          window.location.replace(url);
         }, delay);
-        redirectTimers.push(timer);
+        timers.push(timer);
       }
 
-      function cancelRedirects() {
-        for (var i = 0; i < redirectTimers.length; i++) {
-          clearTimeout(redirectTimers[i]);
+      function stopTimers() {
+        for (var i = 0; i < timers.length; i++) {
+          clearTimeout(timers[i]);
         }
-        redirectTimers = [];
+        timers = [];
       }
 
-      window.addEventListener("pagehide", cancelRedirects);
-      document.addEventListener("visibilitychange", function () {
-        if (document.hidden) {
-          cancelRedirects();
-        }
+      window.addEventListener("pagehide", function () {
+        didUnload = true;
+        stopTimers();
       });
 
       // Try to open app immediately.
-      window.location.href = appLink;
+      window.location.replace(appLink);
 
       if (isAndroid) {
         // If scanner opens Chrome directly, intent:// is more reliable than custom scheme.
-        scheduleRedirect(intentLink, 250);
+        scheduleRedirect(intentLink, 300, false);
 
         // Fallback to custom scheme quickly for browsers that ignore app links.
-        scheduleRedirect(schemeLink, 700);
+        scheduleRedirect(schemeLink, 900, false);
 
         // If still on page, go to Play Store.
-        scheduleRedirect(playStore, 2200);
+        scheduleRedirect(playStore, 2600, false);
         return;
       }
 
       if (isIOS) {
         // On iOS, attempt custom scheme and then App Store fallback.
-        scheduleRedirect(schemeLink, 350);
-        scheduleRedirect(appStoreSearchUrl, 2200);
+        scheduleRedirect(schemeLink, 450, false);
+        scheduleRedirect(appStoreSearchUrl, 2600, false);
         return;
       }
 
