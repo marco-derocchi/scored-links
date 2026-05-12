@@ -69,7 +69,7 @@
 
       var openNow = document.getElementById("openNow");
       var installNow = document.getElementById("installNow");
-      openNow.href = isAndroid ? intentLink : schemeLink;
+      openNow.href = schemeLink;
       installNow.href = isIOS ? appStoreSearchUrl : playStoreMarket;
 
       function scheduleRedirect(url, delay, allowWhenResumed) {
@@ -107,14 +107,11 @@
       }
 
       if (isAndroid) {
-        // If scanner opens Chrome directly, intent:// is more reliable than custom scheme.
-        scheduleRedirect(intentLink, 300, false);
-
-        // Fallback to custom scheme quickly for browsers that ignore app links.
-        scheduleRedirect(schemeLink, 900, false);
+        // Try custom scheme first to avoid browser fallback behavior from intent URLs.
+        scheduleRedirect(schemeLink, 300, false);
 
         // If still on page, try to open Play Store app.
-        scheduleRedirect(playStore, 2600, false);
+        scheduleRedirect(playStore, 1600, false);
         return;
       }
 
