@@ -45,14 +45,16 @@
 
       // Keep payload through Play referrer so backend/app can recover context.
       var referrerValue = encodeURIComponent("utm_source=qr" + (payload ? "&" + payload : ""));
-      var playStore = "https://play.google.com/store/apps/details?id=" + appId + "&referrer=" + referrerValue;
+      var playStoreDetails = "https://play.google.com/store/apps/details?id=" + appId + "&referrer=" + referrerValue;
+      var playStoreSearch = "https://play.google.com/store/search?q=" + encodeURIComponent(appId) + "&c=apps";
+      var playStore = playStoreSearch;
       var intentLink =
         "intent://pair" +
         (payload ? "?" + payload : "") +
         "#Intent;scheme=scored;package=" +
         appId +
         ";S.browser_fallback_url=" +
-        encodeURIComponent(playStore) +
+        encodeURIComponent(playStoreSearch) +
         ";end";
 
       var openNow = document.getElementById("openNow");
@@ -112,7 +114,7 @@
       }
 
       // Desktop or unknown platform: offer install destination but don't force redirects.
-      installNow.href = playStore;
+      installNow.href = playStoreDetails;
     })();
   </script>
 </body>
