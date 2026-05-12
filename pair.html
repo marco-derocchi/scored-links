@@ -38,14 +38,14 @@
       var redirectTimers = [];
 
       // App Link and fallback scheme carry the same query payload.
-      var appLink = "https://links.scoredlabs.com/open" + (payload ? "?" + payload : "");
-      var schemeLink = "scored://open" + (payload ? "?" + payload : "");
+      var appLink = "https://links.scoredlabs.com/pair" + (payload ? "?" + payload : "");
+      var schemeLink = "scored://pair" + (payload ? "?" + payload : "");
 
       // Keep payload through Play referrer so backend/app can recover context.
       var referrerValue = encodeURIComponent("utm_source=qr" + (payload ? "&" + payload : ""));
       var playStore = "https://play.google.com/store/apps/details?id=" + appId + "&referrer=" + referrerValue;
       var intentLink =
-        "intent://open" +
+        "intent://pair" +
         (payload ? "?" + payload : "") +
         "#Intent;scheme=scored;package=" +
         appId +
