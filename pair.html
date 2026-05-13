@@ -3,28 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Open Scored App</title>
-  <meta name="description" content="Open Scored App" />
-  <meta property="og:title" content="Open Scored App" />
-  <meta property="og:description" content="Open Scored App" />
+  <title></title>
+  <meta name="description" content="" />
+  <meta property="og:title" content="" />
+  <meta property="og:description" content="" />
   <style>
-    body { font-family: sans-serif; margin: 0; padding: 24px; background: #0a2a43; color: #ffffff; }
-    .card { max-width: 460px; margin: 40px auto; background: #114164; border-radius: 14px; padding: 24px; }
-    .muted { opacity: 0.86; }
-    .row { margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; }
-    a.button { display: inline-block; text-decoration: none; color: #0a2a43; background: #9ad54b; font-weight: 700; padding: 10px 14px; border-radius: 8px; }
-    a.secondary { background: #d1dde8; }
+    body { margin: 0; background: #ffffff; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Open Scored App</h1>
-    <p class="muted">If the app is installed, it should open automatically. If not, you will be redirected to your device app store.</p>
-    <div class="row">
-      <a id="openNow" class="button" href="#">Open App</a>
-      <a id="installNow" class="button secondary" href="#">Install App</a>
-    </div>
-  </div>
 
   <script>
     (function () {
@@ -66,11 +53,6 @@
         ";S.browser_fallback_url=" +
         encodeURIComponent(playStoreSearch) +
         ";end";
-
-      var openNow = document.getElementById("openNow");
-      var installNow = document.getElementById("installNow");
-      openNow.href = schemeLink;
-      installNow.href = isIOS ? appStoreSearchUrl : playStoreMarket;
 
       function scheduleRedirect(url, delay, allowWhenResumed) {
         var timer = setTimeout(function () {
@@ -122,8 +104,7 @@
         return;
       }
 
-      // Desktop or unknown platform: offer install destination but don't force redirects.
-      installNow.href = playStoreDetails;
+      // Desktop or unknown platform: keep page blank with no forced redirects.
     })();
   </script>
 </body>
