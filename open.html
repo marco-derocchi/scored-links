@@ -34,12 +34,48 @@
       var payload = params.toString();
       var installUrlParam = params.get("installUrl");
       var installUrl = installUrlParam ? decodeURIComponent(installUrlParam) : "";
+      var installTargetUrl = "/install-target.json";
       var userAgent = navigator.userAgent || "";
       var isAndroid = /Android/i.test(userAgent);
       var isIOS = /iPhone|iPad|iPod/i.test(userAgent);
       var launchStartedAt = Date.now();
       var timers = [];
       var didUnload = false;
+      var installLinkReady = false;
+
+      function refreshInstallLink() {
+        var destination = installUrl || playStoreDetails;
+        installNow.href = isIOS ? appStoreSearchUrl : destination;
+      }
+
+      function resolveInstallLinkFromConfig() {
+        if (installUrlParam) {
+          installLinkReady = true;
+          refreshInstallLink();
+          return;
+        }
+
+        fetch(installTargetUrl, { cache: "no-store" })
+          .then(function (response) {
+            if (!response.ok) {
+              return null;
+            }
+
+            return response.json();
+          })
+          .then(function (config) {
+            if (config && typeof config.installUrl === "string" && config.installUrl) {
+              installUrl = config.installUrl;
+            }
+
+            installLinkReady = true;
+            refreshInstallLink();
+          })
+          .catch(function () {
+            installLinkReady = true;
+            refreshInstallLink();
+          });
+      }
 
       // App Link and fallback scheme carry the same query payload.
       var appLink = "https://links.scoredlabs.com/open" + (payload ? "?" + payload : "");
@@ -72,9 +108,10 @@
       var openNow = document.getElementById("openNow");
       var installNow = document.getElementById("installNow");
       openNow.href = schemeLink;
-      installNow.href = isIOS ? appStoreSearchUrl : (installUrl || playStoreMarket);
+      refreshInstallLink();
+      resolveInstallLinkFromConfig();
 
-      function scheduleRedirect(url, delay, allowWhenResumed) {
+      function scheduleRedirect(urlOrResolver, delay, allowWhenResumed) {
         var timer = setTimeout(function () {
           if (didUnload) {
             return;
@@ -86,6 +123,7 @@
             return;
           }
 
+          var url = typeof urlOrResolver === "function" ? urlOrResolver() : urlOrResolver;
           window.location.replace(url);
         }, delay);
         timers.push(timer);
@@ -112,8 +150,10 @@
         // Try custom scheme first to avoid browser fallback behavior from intent URLs.
         scheduleRedirect(schemeLink, 300, false);
 
-        // If still on page, send users to the shared install link when provided.
-        scheduleRedirect(installUrl || playStore, 1600, false);
+        // If still on page, send users to the shared install link when available.
+        scheduleRedirect(function () {
+          return installUrl || playStore;
+        }, 1600, false);
         return;
       }
 
@@ -125,7 +165,7 @@
       }
 
       // Desktop or unknown platform: offer install destination but don't force redirects.
-      installNow.href = installUrl || playStoreDetails;
+      refreshInstallLink();
     })();
   </script>
 </body>
