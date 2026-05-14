@@ -5,9 +5,9 @@
     ],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.example.phone_app",
+      "package_name": "com.scoredlabs.scored",
       "sha256_cert_fingerprints": [
-        "1AF4EEEA489B6281D7252AB3EDEC5E6BA2AE706E68EE79DA80956B1EF56F5C00"
+        "A4:C7:1C:DA:A5:17:12:C8:4B:6A:4E:FC:42:39:AE:21:23:64:AA:24:B4:72:AC:F9:15:B5:71:0B:74:67:11:E7"
       ]
     }
   }
