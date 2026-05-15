@@ -1,0 +1,16 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "F6G7CWXC9G.com.scoredlabs.scored",
+        "paths": [
+          "/pair",
+          "/pair*",
+          "/open",
+          "/open*"
+        ]
+      }
+    ]
+  }
+}
