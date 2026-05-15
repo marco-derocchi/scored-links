@@ -30,10 +30,11 @@
     (function () {
       var appId = "com.scoredlabs.scored";
       var appStoreSearchUrl = "https://apps.apple.com/us/search?term=Scored";
+      var defaultInstallUrl = "https://appdistribution.firebase.dev/i/382adb60fe6cfe39";
       var params = new URLSearchParams(window.location.search);
       var payload = params.toString();
       var installUrlParam = params.get("installUrl");
-      var installUrl = installUrlParam ? decodeURIComponent(installUrlParam) : "";
+      var installUrl = installUrlParam ? decodeURIComponent(installUrlParam) : defaultInstallUrl;
       var installTargetUrl = "/install-target.json";
       var userAgent = navigator.userAgent || "";
       var isAndroid = /Android/i.test(userAgent);
@@ -43,9 +44,12 @@
       var didUnload = false;
       var installLinkReady = false;
 
+      function getInstallDestination() {
+        return installUrl || (isIOS ? appStoreSearchUrl : playStoreDetails);
+      }
+
       function refreshInstallLink() {
-        var destination = installUrl || playStoreDetails;
-        installNow.href = isIOS ? appStoreSearchUrl : destination;
+        installNow.href = getInstallDestination();
       }
 
       function resolveInstallLinkFromConfig() {
@@ -78,8 +82,8 @@
       }
 
       // App Link and fallback scheme carry the same query payload.
-      var appLink = "https://links.scoredlabs.com/open" + (payload ? "?" + payload : "");
-      var schemeLink = "scored://open" + (payload ? "?" + payload : "");
+      var appLink = "https://links.scoredlabs.com/pair" + (payload ? "?" + payload : "");
+      var schemeLink = "scored://pair" + (payload ? "?" + payload : "");
       var currentNoHash = window.location.href.split("#")[0];
       var appLinkNoHash = appLink.split("#")[0];
       var shouldAttemptAppLink = currentNoHash !== appLinkNoHash;
@@ -97,7 +101,7 @@
         ";end";
       var playStore = playStoreIntent;
       var intentLink =
-        "intent://open" +
+        "intent://pair" +
         (payload ? "?" + payload : "") +
         "#Intent;scheme=scored;package=" +
         appId +
@@ -160,7 +164,9 @@
       if (isIOS) {
         // On iOS, attempt custom scheme and then App Store fallback.
         scheduleRedirect(schemeLink, 450, false);
-        scheduleRedirect(appStoreSearchUrl, 2600, false);
+        scheduleRedirect(function () {
+          return installUrl || appStoreSearchUrl;
+        }, 2600, false);
         return;
       }
 
