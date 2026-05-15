@@ -82,8 +82,8 @@
       }
 
       // App Link and fallback scheme carry the same query payload.
-      var appLink = "https://links.scoredlabs.com/pair" + (payload ? "?" + payload : "");
-      var schemeLink = "scored://pair" + (payload ? "?" + payload : "");
+      var appLink = "https://links.scoredlabs.com/open" + (payload ? "?" + payload : "");
+      var schemeLink = "scored://open" + (payload ? "?" + payload : "");
       var currentNoHash = window.location.href.split("#")[0];
       var appLinkNoHash = appLink.split("#")[0];
       var shouldAttemptAppLink = currentNoHash !== appLinkNoHash;
@@ -101,7 +101,7 @@
         ";end";
       var playStore = playStoreIntent;
       var intentLink =
-        "intent://pair" +
+        "intent://open" +
         (payload ? "?" + payload : "") +
         "#Intent;scheme=scored;package=" +
         appId +
