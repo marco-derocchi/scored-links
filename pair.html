@@ -30,11 +30,13 @@
     (function () {
       var appId = "com.scoredlabs.scored";
       var appStoreSearchUrl = "https://apps.apple.com/us/search?term=Scored";
-      var defaultInstallUrl = "https://appdistribution.firebase.dev/i/382adb60fe6cfe39";
+      var defaultAndroidInstallUrl = "https://appdistribution.firebase.dev/i/382adb60fe6cfe39";
+      var defaultIOSInstallUrl = "";
       var params = new URLSearchParams(window.location.search);
       var payload = params.toString();
       var installUrlParam = params.get("installUrl");
-      var installUrl = installUrlParam ? decodeURIComponent(installUrlParam) : defaultInstallUrl;
+      var installUrl = installUrlParam ? decodeURIComponent(installUrlParam) : "";
+      var iosInstallUrl = "";
       var installTargetUrl = "/install-target.json";
       var userAgent = navigator.userAgent || "";
       var isAndroid = /Android/i.test(userAgent);
@@ -45,7 +47,15 @@
       var installLinkReady = false;
 
       function getInstallDestination() {
-        return installUrl || defaultInstallUrl;
+        if (installUrl) {
+          return installUrl;
+        }
+
+        if (isIOS) {
+          return iosInstallUrl || defaultIOSInstallUrl || appStoreSearchUrl;
+        }
+
+        return defaultAndroidInstallUrl;
       }
 
       function refreshInstallLink() {
@@ -70,6 +80,10 @@
           .then(function (config) {
             if (config && typeof config.installUrl === "string" && config.installUrl) {
               installUrl = config.installUrl;
+            }
+
+            if (config && typeof config.iosInstallUrl === "string" && config.iosInstallUrl) {
+              iosInstallUrl = config.iosInstallUrl;
             }
 
             installLinkReady = true;
@@ -156,7 +170,7 @@
 
         // If still on page, send users to the shared install link when available.
         scheduleRedirect(function () {
-          return installUrl || playStore;
+          return installUrl || defaultAndroidInstallUrl || playStore;
         }, 1600, false);
         return;
       }
