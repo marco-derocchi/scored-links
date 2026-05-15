@@ -45,7 +45,7 @@
       var installLinkReady = false;
 
       function getInstallDestination() {
-        return installUrl || (isIOS ? appStoreSearchUrl : playStoreDetails);
+        return installUrl || defaultInstallUrl;
       }
 
       function refreshInstallLink() {
@@ -165,7 +165,7 @@
         // On iOS, attempt custom scheme and then App Store fallback.
         scheduleRedirect(schemeLink, 450, false);
         scheduleRedirect(function () {
-          return installUrl || appStoreSearchUrl;
+          return getInstallDestination();
         }, 2600, false);
         return;
       }
