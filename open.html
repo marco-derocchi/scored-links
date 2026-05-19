@@ -30,7 +30,7 @@
     (function () {
       var appId = "com.scoredlabs.scored";
       var appStoreSearchUrl = "https://apps.apple.com/us/search?term=Scored";
-      var defaultAndroidInstallUrl = "https://appdistribution.firebase.dev/i/382adb60fe6cfe39";
+      var defaultAndroidInstallUrl = "https://groups.google.com/g/scored-prototype-users";
       var defaultIOSInstallUrl = "";
       var params = new URLSearchParams(window.location.search);
       var payload = params.toString();
@@ -188,32 +188,6 @@
       refreshInstallLink();
     })();
 
-    // Add redirection logic for Android users without the app installed to redirect to the Google Groups page.
-    (function () {
-      var userAgent = navigator.userAgent || navigator.vendor || window.opera;
-      var isAndroid = /android/i.test(userAgent);
-      var googleGroupsUrl = "https://groups.google.com/g/scored-prototype-users";
-
-      if (isAndroid) {
-        // Attempt to open the app using an intent
-        var intentLink = "intent://open#Intent;scheme=scored;package=com.scoredlabs.scored;end";
-        var timeout = setTimeout(function () {
-          // Redirect to Google Groups if the app is not installed
-          window.location.href = googleGroupsUrl;
-        }, 1500);
-
-        // Try to open the app
-        var iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = intentLink;
-        document.body.appendChild(iframe);
-
-        // Clear the timeout if the app is opened
-        window.addEventListener('blur', function () {
-          clearTimeout(timeout);
-        });
-      }
-    })();
   </script>
 </body>
 </html>
