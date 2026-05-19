@@ -30,7 +30,7 @@
     (function () {
       var appId = "com.scoredlabs.scored";
       var appStoreSearchUrl = "https://apps.apple.com/us/search?term=Scored";
-      var defaultAndroidInstallUrl = "https://appdistribution.firebase.dev/i/382adb60fe6cfe39";
+      var defaultAndroidInstallUrl = "https://groups.google.com/g/scored-prototype-users";
       var defaultIOSInstallUrl = "";
       var params = new URLSearchParams(window.location.search);
       var payload = params.toString();
@@ -188,22 +188,6 @@
       refreshInstallLink();
     })();
 
-    function checkAppInstalled() {
-      var userAgent = navigator.userAgent || navigator.vendor || window.opera;
-      var isAndroid = /android/i.test(userAgent);
-      var googleGroupsUrl = "https://groups.google.com/g/scored-prototype-users";
-
-      if (isAndroid) {
-        // Check if the app is installed
-        var appInstalled = false; // Replace with actual app detection logic if available
-
-        if (!appInstalled) {
-          window.location.href = googleGroupsUrl;
-        }
-      }
-    }
-
-    checkAppInstalled();
   </script>
 </body>
 </html>
