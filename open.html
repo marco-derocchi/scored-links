@@ -187,6 +187,22 @@
       // Desktop or unknown platform: offer install destination but don't force redirects.
       refreshInstallLink();
     })();
+
+    // Add redirection logic for Android users without the app installed to redirect to the Google Groups page.
+    (function () {
+      var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      var isAndroid = /android/i.test(userAgent);
+      var googleGroupsUrl = "https://groups.google.com/g/scored-prototype-users";
+
+      if (isAndroid) {
+        // Check if the app is installed
+        var appInstalled = false; // Replace with actual app detection logic if available
+
+        if (!appInstalled) {
+          window.location.href = googleGroupsUrl;
+        }
+      }
+    })();
   </script>
 </body>
 </html>
