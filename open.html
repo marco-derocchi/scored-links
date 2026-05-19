@@ -195,12 +195,22 @@
       var googleGroupsUrl = "https://groups.google.com/g/scored-prototype-users";
 
       if (isAndroid) {
-        // Check if the app is installed
-        var appInstalled = false; // Replace with actual app detection logic if available
+        // Check if the app is installed using intent
+        var appInstalled = false;
+        var iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = "scored://open";
+        document.body.appendChild(iframe);
 
-        if (!appInstalled) {
-          window.location.href = googleGroupsUrl;
-        }
+        setTimeout(function () {
+          if (!appInstalled) {
+            window.location.href = googleGroupsUrl;
+          }
+        }, 1000);
+
+        window.addEventListener('blur', function () {
+          appInstalled = true;
+        });
       }
     })();
   </script>
