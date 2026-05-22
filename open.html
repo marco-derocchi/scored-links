@@ -40,7 +40,10 @@
       var installTargetUrl = "/install-target.json";
       var userAgent = navigator.userAgent || "";
       var isAndroid = /Android/i.test(userAgent);
-      var isIOS = /iPhone|iPad|iPod/i.test(userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      var isIOS =
+        /iPhone|iPad|iPod|CriOS|FxiOS|EdgiOS/i.test(userAgent) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) ||
+        (/AppleWebKit/i.test(userAgent) && /Mobile/i.test(userAgent) && !isAndroid);
       var launchStartedAt = Date.now();
       var timers = [];
       var didUnload = false;
@@ -56,6 +59,15 @@
         }
 
         return defaultAndroidInstallUrl;
+      }
+
+      function getIOSSafeInstallDestination() {
+        var destination = getInstallDestination();
+        if (/groups\.google\.com\/g\/scored-prototype-users/i.test(destination)) {
+          return defaultIOSInstallUrl || appStoreSearchUrl;
+        }
+
+        return destination;
       }
 
       function refreshInstallLink() {
@@ -179,7 +191,7 @@
         // On iOS, attempt custom scheme and then App Store fallback.
         scheduleRedirect(schemeLink, 450, false);
         scheduleRedirect(function () {
-          return getInstallDestination();
+          return getIOSSafeInstallDestination();
         }, 2600, false);
         return;
       }
