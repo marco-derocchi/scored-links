@@ -40,19 +40,19 @@
       var installTargetUrl = "/install-target.json";
       var userAgent = navigator.userAgent || "";
       var isAndroid = /Android/i.test(userAgent);
-      var isIOS = /iPhone|iPad|iPod/i.test(userAgent);
+      var isIOS = /iPhone|iPad|iPod/i.test(userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
       var launchStartedAt = Date.now();
       var timers = [];
       var didUnload = false;
       var installLinkReady = false;
 
       function getInstallDestination() {
-        if (installUrl) {
-          return installUrl;
-        }
-
         if (isIOS) {
           return iosInstallUrl || defaultIOSInstallUrl || appStoreSearchUrl;
+        }
+
+        if (installUrl) {
+          return installUrl;
         }
 
         return defaultAndroidInstallUrl;
