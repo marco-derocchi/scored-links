@@ -25,6 +25,11 @@
       var defaultIOSInstallUrl = "https://testflight.apple.com/join/fj2Bv28x";
       var params = new URLSearchParams(window.location.search);
       var payload = params.toString();
+      var shortCodePattern = /^[A-Z0-9]{6,12}$/;
+      var pathParts = window.location.pathname.split("/").filter(Boolean);
+      var pathCode = pathParts.length ? decodeURIComponent(pathParts[pathParts.length - 1]).trim().toUpperCase() : "";
+      var isShortCodePath = pathParts.length === 1 && shortCodePattern.test(pathCode);
+      var resolverBaseUrl = "https://atwywgpbttnqxihlxhqj.supabase.co/functions/v1/resolve-token";
       var installUrlParam = params.get("installUrl");
       var installUrl = installUrlParam ? decodeURIComponent(installUrlParam) : "";
       var iosInstallUrl = "";
@@ -38,6 +43,11 @@
       var launchStartedAt = Date.now();
       var timers = [];
       var didUnload = false;
+
+      if (isShortCodePath) {
+        window.location.replace(resolverBaseUrl + "/" + encodeURIComponent(pathCode));
+        return;
+      }
 
       function getInstallDestination() {
         if (isIOS) {
