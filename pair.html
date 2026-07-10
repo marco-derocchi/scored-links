@@ -198,7 +198,7 @@
       });
 
       // Avoid reloading the same landing URL (can cause loops/freezes on some browsers).
-      if (shouldAttemptAppLink) {
+      if (!isIOS && shouldAttemptAppLink) {
         window.location.replace(appLink);
       }
 
