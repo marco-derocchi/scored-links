@@ -14,9 +14,11 @@
     .row { margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; }
     a.button { display: inline-block; text-decoration: none; color: #0a2a43; background: #9ad54b; font-weight: 700; padding: 10px 14px; border-radius: 8px; }
     a.secondary { background: #d1dde8; }
-    .setup-help { margin-top: 20px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.22); }
+    .setup-help { display: none; margin-top: 20px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.22); }
     .setup-help h2 { margin: 0 0 8px; font-size: 1.1rem; }
     .setup-help p { margin: 0; }
+    .video-frame { margin-top: 14px; aspect-ratio: 9 / 16; max-height: 520px; background: #000000; border-radius: 8px; overflow: hidden; }
+    .video-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
   </style>
 </head>
 <body>
@@ -26,6 +28,9 @@
     <div id="setupHelp" class="setup-help">
       <h2>Installing the beta?</h2>
       <p class="muted">Watch the short setup video first. On iPhone, install TestFlight before opening the Scored beta invite.</p>
+      <div class="video-frame">
+        <iframe id="setupVideo" title="Scored setup video" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+      </div>
       <div class="row">
         <a id="watchSetup" class="button" href="https://www.youtube.com/shorts/qj6u0K6iIGA" target="_blank" rel="noopener">Watch Setup Video</a>
         <a id="installTestFlight" class="button secondary" href="https://apps.apple.com/app/testflight/id899247664" target="_blank" rel="noopener">Install TestFlight</a>
@@ -40,16 +45,17 @@
     (function () {
       var appId = "com.scoredlabs.scored";
       var appStoreSearchUrl = "https://apps.apple.com/us/search?term=Scored";
-      var defaultAndroidInstallUrl = "https://groups.google.com/g/scored-prototype-users";
+      var defaultAndroidInstallUrl = "https://play.google.com/store/apps/details?id=com.scoredlabs.scored";
       var defaultIOSInstallUrl = "https://testflight.apple.com/join/fj2Bv28x";
       var defaultSetupVideoUrl = "https://www.youtube.com/shorts/qj6u0K6iIGA";
+      var defaultSetupEmbedUrl = "https://www.youtube.com/embed/qj6u0K6iIGA?autoplay=1&mute=1&playsinline=1&rel=0";
       var params = new URLSearchParams(window.location.search);
       var payload = params.toString();
       var installUrlParam = params.get("installUrl");
       var installUrl = installUrlParam ? decodeURIComponent(installUrlParam) : "";
       var iosInstallUrl = "";
       var setupVideoUrlParam = params.get("setupVideoUrl") || params.get("videoUrl");
-      var setupVideoUrl = setupVideoUrlParam ? decodeURIComponent(setupVideoUrlParam) : defaultSetupVideoUrl;
+      var setupVideoUrl = setupVideoUrlParam ? decodeURIComponent(setupVideoUrlParam) : "";
       var installTargetUrl = "/install-target.json";
       var userAgent = navigator.userAgent || "";
       var isAndroid = /Android/i.test(userAgent);
@@ -63,7 +69,13 @@
       var openNow = document.getElementById("openNow");
       var installNow = document.getElementById("installNow");
       var watchSetup = document.getElementById("watchSetup");
+      var setupHelp = document.getElementById("setupHelp");
+      var setupVideo = document.getElementById("setupVideo");
       var installTestFlight = document.getElementById("installTestFlight");
+
+      if (!setupVideoUrl && isIOS) {
+        setupVideoUrl = defaultSetupVideoUrl;
+      }
 
       function getInstallDestination() {
         if (isIOS) {
@@ -111,7 +123,7 @@
             }
 
             if (!setupVideoUrlParam && config && typeof config.setupVideoUrl === "string" && config.setupVideoUrl) {
-              setupVideoUrl = config.setupVideoUrl;
+              setupVideoUrl = isIOS ? config.setupVideoUrl : "";
             }
 
             refreshInstallLink();
@@ -128,13 +140,15 @@
       }
 
       function refreshSetupHelp() {
-        if (setupVideoUrl) {
-          watchSetup.href = setupVideoUrl;
+        if (!isIOS) {
+          setupHelp.style.display = "none";
+          setupVideo.removeAttribute("src");
+          return;
         }
 
-        if (!isIOS) {
-          installTestFlight.style.display = "none";
-        }
+        setupHelp.style.display = "block";
+        watchSetup.href = setupVideoUrl || defaultSetupVideoUrl;
+        setupVideo.src = defaultSetupEmbedUrl;
       }
 
       // App Link and fallback scheme carry the same query payload.
@@ -211,12 +225,9 @@
         // Try custom scheme first to avoid browser fallback behavior from intent URLs.
         scheduleRedirect(schemeLink, 300, false);
 
-        // If still on page, send users to the shared install link when no setup video is configured.
+        // If still on page, send Android users straight to Google Play.
         scheduleRedirect(function () {
-          if (setupVideoUrl) {
-            return "";
-          }
-          return installUrl || defaultAndroidInstallUrl || playStore;
+          return installUrl || defaultAndroidInstallUrl || playStoreDetails || playStore;
         }, 1600, false);
         return;
       }
