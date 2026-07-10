@@ -26,19 +26,12 @@
     <h1>Instructions for iOS (iPhone) Users</h1>
     <p class="muted">Follow the instructions in the video to download the Scored&trade; App. TestFlight is Apple's official app for beta testing before apps become available on the App Store.</p>
     <div id="setupHelp" class="setup-help">
-      <h2>Installing the beta?</h2>
-      <p class="muted">Watch the short setup video first. On iPhone, install TestFlight before opening the Scored beta invite.</p>
       <div class="video-frame">
         <iframe id="setupVideo" title="Scored setup video" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
       </div>
       <div class="row">
-        <a id="watchSetup" class="button" href="https://www.youtube.com/shorts/qj6u0K6iIGA" target="_blank" rel="noopener">Watch Setup Video</a>
-        <a id="installTestFlight" class="button secondary" href="https://apps.apple.com/app/testflight/id899247664" target="_blank" rel="noopener">Install TestFlight</a>
+        <a id="installTestFlight" class="button" href="https://testflight.apple.com/join/fj2Bv28x" target="_blank" rel="noopener">Download Scored on TestFlight</a>
       </div>
-    </div>
-    <div class="row">
-      <a id="openNow" class="button" href="#">Open App</a>
-      <a id="installNow" class="button secondary" href="#">Install App</a>
     </div>
   </div>
   <script>
@@ -71,9 +64,6 @@
       var launchStartedAt = Date.now();
       var timers = [];
       var didUnload = false;
-      var openNow = document.getElementById("openNow");
-      var installNow = document.getElementById("installNow");
-      var watchSetup = document.getElementById("watchSetup");
       var setupHelp = document.getElementById("setupHelp");
       var setupVideo = document.getElementById("setupVideo");
       var installTestFlight = document.getElementById("installTestFlight");
@@ -110,7 +100,6 @@
 
       function resolveInstallLinkFromConfig() {
         if (installUrlParam && setupVideoUrlParam) {
-          refreshInstallLink();
           refreshSetupHelp();
           return;
         }
@@ -136,17 +125,11 @@
               setupVideoUrl = isIOS ? config.setupVideoUrl : "";
             }
 
-            refreshInstallLink();
             refreshSetupHelp();
           })
           .catch(function () {
-            refreshInstallLink();
             refreshSetupHelp();
           });
-      }
-
-      function refreshInstallLink() {
-        installNow.href = getInstallDestination();
       }
 
       function refreshSetupHelp() {
@@ -157,8 +140,8 @@
         }
 
         setupHelp.style.display = "block";
-        watchSetup.href = setupVideoUrl || defaultSetupVideoUrl;
         setupVideo.src = defaultSetupEmbedUrl;
+        installTestFlight.href = getIOSSafeInstallDestination();
       }
 
       // App Link and fallback scheme carry the same query payload.
@@ -188,8 +171,6 @@
         ";S.browser_fallback_url=" +
         encodeURIComponent(playStoreSearch) +
         ";end";
-      openNow.href = schemeLink;
-      refreshInstallLink();
       refreshSetupHelp();
       resolveInstallLinkFromConfig();
 
