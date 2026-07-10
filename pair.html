@@ -214,14 +214,6 @@
       }
 
       if (isIOS) {
-        // On iOS, attempt custom scheme and then install fallback when no setup video is configured.
-        scheduleRedirect(schemeLink, 450, false);
-        scheduleRedirect(function () {
-          if (setupVideoUrl) {
-            return "";
-          }
-          return getIOSSafeInstallDestination();
-        }, 2600, false);
         return;
       }
 
